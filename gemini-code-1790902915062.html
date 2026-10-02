@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf8">
+    <title>Hello World</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            font: 16px Arial;
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+        .container {
+            width: 480px;
+            margin: 40px auto;
+            padding: 32px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+        }
+        h1 {
+            margin: 0 0 16px 0;
+            font: bold 32px Arial;
+            color: #1e293b;
+        }
+        p {
+            margin: 0 0 16px 0;
+            color: #475569;
+        }
+        button {
+            padding: 12px 24px;
+            font: bold 14px Arial;
+            color: #ffffff;
+            background: #2563eb;
+            border: none;
+            cursor: pointer;
+        }
+        #clock {
+            color: #64748b;
+        }
+        #counter {
+            margin: 16px 0 0 0;
+            color: #334155;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" align="center">
+        <h1 id="greeting">Hello, World!</h1>
+        <p>Welcome to this interactive web page.</p>
+        <p id="clock"></p>
+        <button onclick="cycleGreeting()">Change Greeting</button>
+        <p id="counter">Clicks: 0</p>
+    </div>
+
+    <script>
+        const greetings = [
+            "Hello, World!",
+            "Bonjour le monde!",
+            "Hola Mundo!",
+            "Ciao Mondo!",
+            "Hallo Welt!"
+        ];
+        let index = 0;
+        let count = 0;
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById("clock").textContent = now.toLocaleTimeString();
+        }
+
+        function cycleGreeting() {
+            index = (index + 1) % greetings.length;
+            count = count + 1;
+            document.getElementById("greeting").textContent = greetings[index];
+            document.getElementById("counter").textContent = "Clicks: " + count;
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>
