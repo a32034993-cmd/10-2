@@ -1,0 +1,2119 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIwMzc5MDgyNTU1NTExNzM2MDkwMCIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzk3ZjNmZDU5M2Q0ZTNkNTZfaW5kZXguaHRtbC03MzIifSwiZXhwIjoxNzkyMTE2MzM1LCJpYXQiOjE3OTIxMTI3MzUsImFsZyI6IlJTMjU2In0.NUN4a4LTrE5_oEx1PPGouUbcsss55-YLQQhi19W1bxfNQFCsh_JTnNWl784G_jUiefk5Kp1tAL5KItcBN8mAknoRtHsNoGAaqEnVPsK-yWwTKP2IsjBuTkRD478NfUaLXRzw-_dGFjR4GAaschX3gPRBSOt9pbtscYIQrOPpTC1lY8Uo4J7JIo7LoQV5ZRiYFW2WpL2nFWvYloZ_s9kKNprMasYtYV1-q6D2RKqiy72iNJxnP6K8-wi5ctEE0NIRqp-P7xrFxNgry2EQw-YbDfSrdgTp7zJPlZa4Qq8Lh4No2tj1Le0yl-RRYYOp-eSlXzD0Nb8sPYgnbh_RM7GKZg","c_97f3fd593d4e3d56_index.html-732")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project A 的前端 UI 練習 | 個人日常工作台</title>
+    <style>
+        /* ==========================================================================
+           1. CSS 變數與基礎設定 (Design Tokens & Reset)
+           不使用任何外部框架，純手刻現代極簡 Dashboard 視覺風格
+           ========================================================================== */
+        :root {
+            --bg-body: #f1f5f9;
+            --bg-surface: #ffffff;
+            --bg-subtle: #f8fafc;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --border-focus: #3b82f6;
+            
+            /* 主題色系 */
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            
+            /* 狀態色系 */
+            --success: #10b981;
+            --success-bg: #ecfdf5;
+            --success-text: #065f46;
+            
+            --warning: #f59e0b;
+            --warning-bg: #fffbeb;
+            --warning-text: #92400e;
+            
+            --danger: #ef4444;
+            --danger-bg: #fef2f2;
+            --danger-text: #b91c1c;
+
+            --purple-bg: #f3e8ff;
+            --purple-text: #6b21a8;
+
+            /* 尺寸與陰影 */
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+            --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.05);
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", "PingFang TC", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 60px;
+            overflow-x: hidden;
+        }
+
+        button, input, select, textarea {
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        /* ==========================================================================
+           2. 頂部練習輔助工具列 (Practice Workflow Toolbar)
+           對應：生成、預覽、修改、保存與發布
+           ========================================================================== */
+        .workflow-bar {
+            background-color: #1e293b;
+            color: #f8fafc;
+            padding: 12px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+        }
+
+        .workflow-container {
+            max-width: 1120px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .workflow-steps {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+
+        .step-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        .step-badge.active {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        .workflow-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* ==========================================================================
+           3. 手機寬度模擬器外框 (375px Mobile Viewport Simulator)
+           方便使用者在電腦上直接驗證「手機寬度不重疊」
+           ========================================================================== */
+        .app-viewport {
+            max-width: 1120px;
+            margin: 24px auto;
+            padding: 0 20px;
+            transition: max-width 0.35s ease, padding 0.35s ease;
+        }
+
+        .app-viewport.mobile-sim-active {
+            max-width: 375px;
+            padding: 20px 14px;
+            background-color: var(--bg-body);
+            border: 10px solid #0f172a;
+            border-top-width: 36px;
+            border-bottom-width: 36px;
+            border-radius: 36px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+            position: relative;
+        }
+
+        /* 手機模擬聽筒裝飾 */
+        .app-viewport.mobile-sim-active::before {
+            content: "375px 手機寬度預覽模式";
+            position: absolute;
+            top: -27px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #94a3b8;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        /* ==========================================================================
+           4. 網站標題與今日日期區塊 (Header Banner)
+           ========================================================================== */
+        .site-header {
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .project-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            width: fit-content;
+        }
+
+        .site-title {
+            font-size: 1.65rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            line-height: 1.25;
+        }
+
+        .site-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .date-card {
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+            min-width: 220px;
+        }
+
+        .date-label {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .date-display {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .date-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+        }
+
+        .date-picker-input {
+            padding: 3px 8px;
+            font-size: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            background: #fff;
+        }
+
+        /* ==========================================================================
+           5. 主內容網格佈局 (Main Dashboard Grid)
+           ========================================================================== */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        /* 在手機模擬模式或真實小螢幕強制轉為單欄，避免重疊 */
+        .app-viewport.mobile-sim-active .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .app-viewport.mobile-sim-active .site-header {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 18px;
+        }
+
+        .app-viewport.mobile-sim-active .date-card {
+            align-items: flex-start;
+            min-width: 0;
+            width: 100%;
+        }
+
+        /* ==========================================================================
+           6. 卡片與清單元件樣式 (Cards, Schedule & Todo Items)
+           ========================================================================== */
+        .card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .count-pill {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 2px 9px;
+            border-radius: 999px;
+            background: var(--bg-body);
+            color: var(--text-secondary);
+        }
+
+        .item-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* 固定行程卡片項目 */
+        .schedule-item {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+        }
+
+        .schedule-item:hover {
+            border-color: #cbd5e1;
+            border-left-color: var(--primary);
+            background: #ffffff;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .schedule-main {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            flex: 1 1 200px;
+            min-width: 0;
+        }
+
+        .time-badge {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            flex-shrink: 0;
+        }
+
+        .item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .item-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        .item-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* 待辦事項項目 */
+        .todo-item {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+        }
+
+        .todo-item.is-completed {
+            background: #f8fafc;
+            opacity: 0.82;
+        }
+
+        .todo-main {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            flex: 1 1 200px;
+            min-width: 0;
+            cursor: pointer;
+        }
+
+        .todo-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: var(--success);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .todo-item.is-completed .item-title {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        /* 狀態與分類標籤 */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .tag-status-done {
+            background: var(--success-bg);
+            color: var(--success-text);
+        }
+
+        .tag-status-pending {
+            background: var(--warning-bg);
+            color: var(--warning-text);
+        }
+
+        .tag-category {
+            background: var(--purple-bg);
+            color: var(--purple-text);
+        }
+
+        .item-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        /* 行內編輯面板 */
+        .inline-edit-box {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .inline-edit-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .inline-input {
+            flex: 1 1 120px;
+            padding: 6px 10px;
+            border: 1px solid var(--border-focus);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+        }
+
+        /* ==========================================================================
+           7. 新增行程與待辦事項表單 (Add Item Form)
+           ========================================================================== */
+        .form-card {
+            margin-bottom: 24px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 16px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .col-type { grid-column: span 3; }
+        .col-time { grid-column: span 2; }
+        .col-title { grid-column: span 4; }
+        .col-tag { grid-column: span 3; }
+        .col-submit { grid-column: span 12; display: flex; justify-content: flex-end; gap: 10px; }
+
+        .app-viewport.mobile-sim-active .col-type,
+        .app-viewport.mobile-sim-active .col-time,
+        .app-viewport.mobile-sim-active .col-title,
+        .app-viewport.mobile-sim-active .col-tag,
+        .app-viewport.mobile-sim-active .col-submit {
+            grid-column: span 12;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .form-control:disabled {
+            background: var(--bg-body);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        /* ==========================================================================
+           8. 按鈕樣式系統 (Buttons)
+           ========================================================================== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.88rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: #ffffff;
+        }
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-outline {
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+        .btn-outline:hover {
+            background: var(--bg-subtle);
+            border-color: #cbd5e1;
+        }
+
+        .btn-dark-tool {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            font-size: 0.82rem;
+        }
+        .btn-dark-tool:hover {
+            background: rgba(255, 255, 255, 0.22);
+        }
+        .btn-dark-tool.active-mode {
+            background: var(--warning);
+            color: #0f172a;
+            border-color: var(--warning);
+        }
+
+        .btn-sm {
+            padding: 4px 9px;
+            font-size: 0.78rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .btn-danger-ghost {
+            background: transparent;
+            color: var(--danger);
+            border-color: transparent;
+        }
+        .btn-danger-ghost:hover {
+            background: var(--danger-bg);
+        }
+
+        /* ==========================================================================
+           9. 完成證據與 GitHub 發布驗收區塊 (Evidence & Verification Section)
+           ========================================================================== */
+        .evidence-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .app-viewport.mobile-sim-active .evidence-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .evidence-box {
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .evidence-check-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .evidence-check-label input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+
+        .evidence-desc {
+            font-size: 0.84rem;
+            color: var(--text-secondary);
+        }
+
+        .code-snippet {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.78rem;
+            overflow-x: auto;
+            line-height: 1.5;
+        }
+
+        /* ==========================================================================
+           10. 訊息通知 Toast 與空白狀態 (Toast & Empty State)
+           ========================================================================== */
+        .toast-notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 999;
+            opacity: 0;
+            transform: translateY(15px);
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .toast-notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 28px 16px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border: 1px dashed var(--border-color);
+            border-radius: var(--radius-md);
+        }
+
+        /* ==========================================================================
+           11. 響應式斷點 (Media Queries - 確保 320px~768px 手機寬度絕不重疊)
+           ========================================================================== */
+        @media (max-width: 860px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .evidence-grid {
+                grid-template-columns: 1fr;
+            }
+            .col-type, .col-time {
+                grid-column: span 6;
+            }
+            .col-title, .col-tag {
+                grid-column: span 6;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .workflow-bar {
+                padding: 10px 14px;
+            }
+            .workflow-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .workflow-actions .btn {
+                flex: 1 1 auto;
+                font-size: 0.78rem;
+                padding: 6px 10px;
+            }
+            .app-viewport {
+                margin: 14px auto;
+                padding: 0 12px;
+            }
+            .site-header {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 18px;
+            }
+            .date-card {
+                align-items: flex-start;
+                min-width: 0;
+                width: 100%;
+            }
+            .card {
+                padding: 16px;
+            }
+            .col-type, .col-time, .col-title, .col-tag, .col-submit {
+                grid-column: span 12;
+            }
+            .col-submit .btn {
+                width: 100%;
+            }
+            .schedule-item, .todo-item {
+                padding: 12px;
+            }
+            .item-actions {
+                width: 100%;
+                justify-content: flex-end;
+                padding-top: 8px;
+                border-top: 1px solid var(--border-color);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 頂部練習流程工具列：對應「生成、預覽、修改、保存與發布」 -->
+    <nav class="workflow-bar" aria-label="練習流程輔助工具列">
+        <div class="workflow-container">
+            <div class="workflow-steps">
+                <span class="step-badge active">1. 生成 UI</span>
+                <span class="step-badge active" id="stepPreviewBadge">2. 預覽 RWD</span>
+                <span class="step-badge active" id="stepModifyBadge">3. 修改內容</span>
+                <span class="step-badge" id="stepSaveBadge">4. 保存狀態</span>
+                <span class="step-badge" id="stepPublishBadge">5. 發布 GitHub</span>
+            </div>
+            <div class="workflow-actions">
+                <button type="button" class="btn btn-dark-tool" id="btnToggleMobile" title="在畫面上模擬 375px 手機寬度，檢查是否重疊">
+                    📱 切換手機寬度預覽 (375px)
+                </button>
+                <button type="button" class="btn btn-dark-tool" id="btnSaveStorage" title="將目前的行程與待辦事項存入瀏覽器 LocalStorage">
+                    💾 保存變更
+                </button>
+                <button type="button" class="btn btn-dark-tool" id="btnResetDefault" title="恢復成最初的三筆固定行程與三筆待辦事項">
+                    🔄 重置預設三筆
+                </button>
+                <button type="button" class="btn btn-success btn-sm" id="btnDownloadHtml" title="下載單一 index.html 檔案，可直接雙擊開啟或上傳 GitHub">
+                    ⬇️ 下載 index.html
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主畫面容器（支援切換 375px 手機預覽模式） -->
+    <main class="app-viewport" id="appViewport">
+
+        <!-- 1. 網站標題與今天日期 -->
+        <header class="site-header">
+            <div class="brand-group">
+                <span class="project-tag">Project A • Frontend UI Practice</span>
+                <h1 class="site-title">Project A 的前端 UI 練習工作台</h1>
+                <p class="site-subtitle">純 HTML + CSS + JS 靜態單頁應用｜無框架、無 API、無金鑰、離線直開</p>
+            </div>
+            <div class="date-card">
+                <span class="date-label">📅 今天日期 (自動抓取 / 可切換)</span>
+                <div class="date-display" id="currentDateText">2026 年 10 月 16 日 (星期五)</div>
+                <div class="date-controls">
+                    <input type="date" id="datePickerInput" class="date-picker-input" aria-label="手動選擇日期">
+                    <button type="button" class="btn btn-outline btn-sm" id="btnResetToday">回到今天</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 2 & 3. 三筆固定行程 & 三筆待辦事項與狀態 -->
+        <section class="dashboard-grid" aria-label="行程與待辦事項看板">
+            
+            <!-- 左欄：固定行程 (預設 3 筆) -->
+            <article class="card">
+                <div class="card-header">
+                    <div class="card-title-group">
+                        <h2 class="card-title">🕒 今日固定行程</h2>
+                        <span class="count-pill" id="scheduleCountPill">3 筆行程</span>
+                    </div>
+                    <span class="tag tag-category">點擊編輯可修改</span>
+                </div>
+                <ul class="item-list" id="scheduleListContainer"><li class="schedule-item" data-id="sch-1"><div class="schedule-main"><span class="time-badge">09:30</span><div class="item-info"><span class="item-title">Project A 晨間站立會議 (Daily Standup)</span><div class="item-meta"><span>📍 線上會議室 A</span></div></div></div><div class="item-actions"><button type="button" class="btn btn-outline btn-sm" data-action="edit-sch" data-id="sch-1">編輯</button><button type="button" class="btn btn-danger-ghost btn-sm" data-action="delete-sch" data-id="sch-1" aria-label="刪除行程">刪除</button></div></li><li class="schedule-item" data-id="sch-2"><div class="schedule-main"><span class="time-badge">14:00</span><div class="item-info"><span class="item-title">前端 UI 響應式排版與手機寬度檢視</span><div class="item-meta"><span>📍 設計系統工作區</span></div></div></div><div class="item-actions"><button type="button" class="btn btn-outline btn-sm" data-action="edit-sch" data-id="sch-2">編輯</button><button type="button" class="btn btn-danger-ghost btn-sm" data-action="delete-sch" data-id="sch-2" aria-label="刪除行程">刪除</button></div></li><li class="schedule-item" data-id="sch-3"><div class="schedule-main"><span class="time-badge">16:30</span><div class="item-info"><span class="item-title">靜態單頁封裝與 GitHub Pages 發布演練</span><div class="item-meta"><span>📍 DevOps 實驗室</span></div></div></div><div class="item-actions"><button type="button" class="btn btn-outline btn-sm" data-action="edit-sch" data-id="sch-3">編輯</button><button type="button" class="btn btn-danger-ghost btn-sm" data-action="delete-sch" data-id="sch-3" aria-label="刪除行程">刪除</button></div></li></ul>
+            </article>
+
+            <!-- 右欄：待辦事項與狀態 (預設 3 筆) -->
+            <article class="card">
+                <div class="card-header">
+                    <div class="card-title-group">
+                        <h2 class="card-title">✅ 待辦事項與狀態</h2>
+                        <span class="count-pill" id="todoCountPill">1 / 3 已完成</span>
+                    </div>
+                    <span class="tag tag-status-done">支援勾選切換狀態</span>
+                </div>
+                <ul class="item-list" id="todoListContainer"><li class="todo-item is-completed" data-id="todo-1"><label class="todo-main"><input type="checkbox" class="todo-checkbox" data-action="toggle-todo" data-id="todo-1" checked=""><div class="item-info"><span class="item-title">完成標題、今日日期與三筆固定行程版面設計</span><div class="item-meta"><span class="tag tag-status-done">已完成</span><span class="tag tag-category">UI 結構</span></div></div></label><div class="item-actions"><button type="button" class="btn btn-outline btn-sm" data-action="edit-todo" data-id="todo-1">編輯</button><button type="button" class="btn btn-danger-ghost btn-sm" data-action="delete-todo" data-id="todo-1" aria-label="刪除待辦事項">刪除</button></div></li><li class="todo-item " data-id="todo-2"><label class="todo-main"><input type="checkbox" class="todo-checkbox" data-action="toggle-todo" data-id="todo-2"><div class="item-info"><span class="item-title">測試手機寬度 (375px) 預覽確保卡片與按鈕不重疊</span><div class="item-meta"><span class="tag tag-status-pending">未完成</span><span class="tag tag-category">RWD 驗收</span></div></div></label><div class="item-actions"><button type="button" class="btn btn-outline btn-sm" data-action="edit-todo" data-id="todo-2">編輯</button><button type="button" class="btn btn-danger-ghost btn-sm" data-action="delete-todo" data-id="todo-2" aria-label="刪除待辦事項">刪除</button></div></li><li class="todo-item " data-id="todo-3"><label class="todo-main"><input type="checkbox" class="todo-checkbox" data-action="toggle-todo" data-id="todo-3"><div class="item-info"><span class="item-title">匯出 index.html 並上傳至 GitHub Repository</span><div class="item-meta"><span class="tag tag-status-pending">未完成</span><span class="tag tag-category">部署發布</span></div></div></label><div class="item-actions"><button type="button" class="btn btn-outline btn-sm" data-action="edit-todo" data-id="todo-3">編輯</button><button type="button" class="btn btn-danger-ghost btn-sm" data-action="delete-todo" data-id="todo-3" aria-label="刪除待辦事項">刪除</button></div></li></ul>
+            </article>
+
+        </section>
+
+        <!-- 4. 新增行程與待辦事項表單 -->
+        <section class="card form-card" aria-label="新增行程或待辦事項表單">
+            <div class="card-header">
+                <div class="card-title-group">
+                    <h2 class="card-title">➕ 新增行程 / 待辦事項表單</h2>
+                </div>
+                <span style="font-size: 0.82rem; color: var(--text-secondary);">練習「修改」與「保存」流程：新增後可點擊上方保存按鈕</span>
+            </div>
+
+            <form id="addItemForm" class="form-grid">
+                <div class="form-group col-type">
+                    <label for="inputItemType" class="form-label">新增類型</label>
+                    <select id="inputItemType" class="form-control">
+                        <option value="schedule">🕒 固定行程 (Schedule)</option>
+                        <option value="todo">✅ 待辦事項 (To-Do)</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-time">
+                    <label for="inputItemTime" class="form-label" id="labelItemTime">行程時間</label>
+                    <input type="time" id="inputItemTime" class="form-control" value="14:00" required="">
+                </div>
+
+                <div class="form-group col-title">
+                    <label for="inputItemTitle" class="form-label">標題內容 <span style="color: var(--danger);">*</span></label>
+                    <input type="text" id="inputItemTitle" class="form-control" placeholder="例如：前端 UI 元件走查會議..." maxlength="60" required="">
+                </div>
+
+                <div class="form-group col-tag">
+                    <label for="inputItemTag" class="form-label">地點或分類標籤</label>
+                    <input type="text" id="inputItemTag" class="form-control" placeholder="例如：線上會議室 / UI 開發" maxlength="25">
+                </div>
+
+                <div class="col-submit">
+                    <button type="reset" class="btn btn-outline">清除重填</button>
+                    <button type="submit" class="btn btn-primary">＋ 加入清單</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- 5. 完成證據與發布自我檢查清單 -->
+        <section class="card" aria-label="完成證據與發布指南">
+            <div class="card-header">
+                <div class="card-title-group">
+                    <h2 class="card-title">🏆 完成證據與發布檢核 (Verification Checklist)</h2>
+                </div>
+                <span class="tag tag-status-done" id="evidenceProgressTag">檢核進度：3 / 3</span>
+            </div>
+
+            <div class="evidence-grid">
+                <!-- 證據 1 -->
+                <div class="evidence-box">
+                    <label class="evidence-check-label">
+                        <input type="checkbox" class="evidence-checkbox" checked="">
+                        <span>1. index.html 可直接開啟</span>
+                    </label>
+                    <p class="evidence-desc">
+                        本網頁採用 100% 原生 HTML + CSS + JS 單一檔案結構，無使用任何外部框架或 API Key。點擊上方「下載 index.html」後，直接雙擊檔案即可在瀏覽器離線完整運作。
+                    </p>
+                </div>
+
+                <!-- 證據 2 -->
+                <div class="evidence-box">
+                    <label class="evidence-check-label">
+                        <input type="checkbox" class="evidence-checkbox" checked="">
+                        <span>2. 手機寬度不重疊</span>
+                    </label>
+                    <p class="evidence-desc">
+                        透過 CSS Grid 自適應欄位與 Flexbox 換行機制，在 320px ~ 480px 手機螢幕下自動轉為單欄垂直排列。可點擊上方「📱 切換手機寬度預覽」立即驗證無重疊、無水平破版。
+                    </p>
+                </div>
+
+                <!-- 證據 3 -->
+                <div class="evidence-box">
+                    <label class="evidence-check-label">
+                        <input type="checkbox" class="evidence-checkbox" checked="">
+                        <span>3. GitHub Repository 部署就緒</span>
+                    </label>
+                    <p class="evidence-desc">
+                        將下載的 <code>index.html</code> 放入專案資料夾並推送至 GitHub，開啟 GitHub Pages 即可完成發布：
+                    </p>
+                    <pre class="code-snippet">git init
+git add index.html
+git commit -m "feat: Project A UI"
+git push -u origin main</pre>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 右下角狀態提示 Toast -->
+    <div id="toastBox" class="toast-notification" role="status" aria-live="polite"></div>
+
+    <!-- ==========================================================================
+         純原生 JavaScript 邏輯 (Vanilla JS - 無外部依賴、無 API Key)
+         ========================================================================== -->
+    <script>
+        (function () {
+            "use strict";
+
+            // LocalStorage 儲存鍵名（僅用於瀏覽器本地練習保存狀態，無需後端資料庫）
+            const STORAGE_KEY = "PROJECT_A_UI_PRACTICE_STATE_V1";
+
+            // 預設三筆固定行程
+            const DEFAULT_SCHEDULES = [
+                {
+                    id: "sch-1",
+                    time: "09:30",
+                    title: "Project A 晨間站立會議 (Daily Standup)",
+                    tag: "線上會議室 A"
+                },
+                {
+                    id: "sch-2",
+                    time: "14:00",
+                    title: "前端 UI 響應式排版與手機寬度檢視",
+                    tag: "設計系統工作區"
+                },
+                {
+                    id: "sch-3",
+                    time: "16:30",
+                    title: "靜態單頁封裝與 GitHub Pages 發布演練",
+                    tag: "DevOps 實驗室"
+                }
+            ];
+
+            // 預設三筆待辦事項與狀態
+            const DEFAULT_TODOS = [
+                {
+                    id: "todo-1",
+                    title: "完成標題、今日日期與三筆固定行程版面設計",
+                    tag: "UI 結構",
+                    completed: true
+                },
+                {
+                    id: "todo-2",
+                    title: "測試手機寬度 (375px) 預覽確保卡片與按鈕不重疊",
+                    tag: "RWD 驗收",
+                    completed: false
+                },
+                {
+                    id: "todo-3",
+                    title: "匯出 index.html 並上傳至 GitHub Repository",
+                    tag: "部署發布",
+                    completed: false
+                }
+            ];
+
+            // 應用程式狀態
+            let appState = {
+                schedules: [],
+                todos: [],
+                editingId: null // 記錄當前正在行內編輯的項目 ID
+            };
+
+            // DOM 元素參照
+            const currentDateText = document.getElementById("currentDateText");
+            const datePickerInput = document.getElementById("datePickerInput");
+            const btnResetToday = document.getElementById("btnResetToday");
+
+            const scheduleListContainer = document.getElementById("scheduleListContainer");
+            const todoListContainer = document.getElementById("todoListContainer");
+            const scheduleCountPill = document.getElementById("scheduleCountPill");
+            const todoCountPill = document.getElementById("todoCountPill");
+
+            const addItemForm = document.getElementById("addItemForm");
+            const inputItemType = document.getElementById("inputItemType");
+            const inputItemTime = document.getElementById("inputItemTime");
+            const labelItemTime = document.getElementById("labelItemTime");
+            const inputItemTitle = document.getElementById("inputItemTitle");
+            const inputItemTag = document.getElementById("inputItemTag");
+
+            const btnToggleMobile = document.getElementById("btnToggleMobile");
+            const btnSaveStorage = document.getElementById("btnSaveStorage");
+            const btnResetDefault = document.getElementById("btnResetDefault");
+            const btnDownloadHtml = document.getElementById("btnDownloadHtml");
+            const appViewport = document.getElementById("appViewport");
+
+            const stepSaveBadge = document.getElementById("stepSaveBadge");
+            const stepPublishBadge = document.getElementById("stepPublishBadge");
+            const toastBox = document.getElementById("toastBox");
+
+            // ------------------------------------------------------------------
+            // 工具函式：顯示 Toast 訊息（取代生硬的 alert）
+            // ------------------------------------------------------------------
+            let toastTimer = null;
+            function showToast(message) {
+                toastBox.textContent = message;
+                toastBox.classList.add("show");
+                if (toastTimer) clearTimeout(toastTimer);
+                toastTimer = setTimeout(function () {
+                    toastBox.classList.remove("show");
+                }, 2800);
+            }
+
+            // ------------------------------------------------------------------
+            // 工具函式：HTML 字元跳脫（防止 XSS）
+            // ------------------------------------------------------------------
+            function escapeHtml(str) {
+                if (!str) return "";
+                return String(str)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            // ------------------------------------------------------------------
+            // 1. 日期處理邏輯：顯示今天日期與星期
+            // ------------------------------------------------------------------
+            function formatDateChinese(dateObj) {
+                const year = dateObj.getFullYear();
+                const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+                const day = String(dateObj.getDate()).padStart(2, "0");
+                const weekNames = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+                const weekDay = weekNames[dateObj.getDay()];
+                return year + " 年 " + month + " 月 " + day + " 日 (" + weekDay + ")";
+            }
+
+            function toInputDateFormat(dateObj) {
+                const year = dateObj.getFullYear();
+                const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+                const day = String(dateObj.getDate()).padStart(2, "0");
+                return year + "-" + month + "-" + day;
+            }
+
+            function setTodayDate() {
+                const now = new Date();
+                currentDateText.textContent = formatDateChinese(now);
+                datePickerInput.value = toInputDateFormat(now);
+            }
+
+            datePickerInput.addEventListener("change", function (e) {
+                if (!e.target.value) return;
+                const parts = e.target.value.split("-");
+                const selectedDate = new Date(
+                    parseInt(parts[0], 10),
+                    parseInt(parts[1], 10) - 1,
+                    parseInt(parts[2], 10)
+                );
+                currentDateText.textContent = formatDateChinese(selectedDate);
+                showToast("📅 已切換顯示日期為：" + e.target.value);
+            });
+
+            btnResetToday.addEventListener("click", function () {
+                setTodayDate();
+                showToast("📅 已恢復顯示今天日期");
+            });
+
+            // ------------------------------------------------------------------
+            // 2. 狀態載入、保存與重置 (LocalStorage)
+            // ------------------------------------------------------------------
+            function loadState() {
+                try {
+                    const savedRaw = localStorage.getItem(STORAGE_KEY);
+                    if (savedRaw) {
+                        const parsed = JSON.parse(savedRaw);
+                        if (Array.isArray(parsed.schedules) && Array.isArray(parsed.todos)) {
+                            appState.schedules = parsed.schedules;
+                            appState.todos = parsed.todos;
+                            stepSaveBadge.classList.add("active");
+                            return;
+                        }
+                    }
+                } catch (err) {
+                    console.warn("無法讀取本地狀態，將使用預設三筆資料：", err);
+                }
+                // 若無儲存紀錄，深拷貝預設三筆資料
+                appState.schedules = JSON.parse(JSON.stringify(DEFAULT_SCHEDULES));
+                appState.todos = JSON.parse(JSON.stringify(DEFAULT_TODOS));
+            }
+
+            function saveStateToLocal(silent) {
+                try {
+                    const payload = JSON.stringify({
+                        schedules: appState.schedules,
+                        todos: appState.todos,
+                        savedAt: new Date().toISOString()
+                    });
+                    localStorage.setItem(STORAGE_KEY, payload);
+                    stepSaveBadge.classList.add("active");
+                    if (!silent) {
+                        showToast("💾 變更已保存至瀏覽器 LocalStorage！");
+                    }
+                } catch (err) {
+                    showToast("⚠️ 儲存失敗，請確認瀏覽器是否允許本地儲存");
+                }
+            }
+
+            function resetToDefaultState() {
+                appState.schedules = JSON.parse(JSON.stringify(DEFAULT_SCHEDULES));
+                appState.todos = JSON.parse(JSON.stringify(DEFAULT_TODOS));
+                appState.editingId = null;
+                localStorage.removeItem(STORAGE_KEY);
+                renderAll();
+                showToast("🔄 已重置回預設的三筆固定行程與三筆待辦事項");
+            }
+
+            // ------------------------------------------------------------------
+            // 3. 渲染固定行程清單 (支援行內修改與刪除)
+            // ------------------------------------------------------------------
+            function renderSchedules() {
+                // 依時間排序
+                const sorted = appState.schedules.slice().sort(function (a, b) {
+                    return (a.time || "").localeCompare(b.time || "");
+                });
+
+                scheduleCountPill.textContent = sorted.length + " 筆行程";
+
+                if (sorted.length === 0) {
+                    scheduleListContainer.innerHTML = '<li class="empty-state">目前尚無行程，可由下方表單新增或點擊上方「重置預設三筆」</li>';
+                    return;
+                }
+
+                scheduleListContainer.innerHTML = sorted.map(function (item) {
+                    const isEditing = appState.editingId === item.id;
+
+                    if (isEditing) {
+                        return (
+                            '<li class="schedule-item" data-id="' + escapeHtml(item.id) + '">' +
+                                '<div class="inline-edit-box">' +
+                                    '<div class="inline-edit-row">' +
+                                        '<input type="time" class="inline-input edit-sch-time" value="' + escapeHtml(item.time) + '" aria-label="修改時間">' +
+                                        '<input type="text" class="inline-input edit-sch-tag" value="' + escapeHtml(item.tag) + '" placeholder="地點或標籤" aria-label="修改地點或標籤">' +
+                                    '</div>' +
+                                    '<div class="inline-edit-row">' +
+                                        '<input type="text" class="inline-input edit-sch-title" value="' + escapeHtml(item.title) + '" placeholder="行程名稱" aria-label="修改行程名稱">' +
+                                        '<button type="button" class="btn btn-primary btn-sm" data-action="save-sch" data-id="' + escapeHtml(item.id) + '">儲存修改</button>' +
+                                        '<button type="button" class="btn btn-outline btn-sm" data-action="cancel-edit">取消</button>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</li>'
+                        );
+                    }
+
+                    return (
+                        '<li class="schedule-item" data-id="' + escapeHtml(item.id) + '">' +
+                            '<div class="schedule-main">' +
+                                '<span class="time-badge">' + escapeHtml(item.time || "--:--") + '</span>' +
+                                '<div class="item-info">' +
+                                    '<span class="item-title">' + escapeHtml(item.title) + '</span>' +
+                                    '<div class="item-meta">' +
+                                        '<span>📍 ' + escapeHtml(item.tag || "未分類") + '</span>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="item-actions">' +
+                                '<button type="button" class="btn btn-outline btn-sm" data-action="edit-sch" data-id="' + escapeHtml(item.id) + '">編輯</button>' +
+                                '<button type="button" class="btn btn-danger-ghost btn-sm" data-action="delete-sch" data-id="' + escapeHtml(item.id) + '" aria-label="刪除行程">刪除</button>' +
+                            '</div>' +
+                        '</li>'
+                    );
+                }).join("");
+            }
+
+            // ------------------------------------------------------------------
+            // 4. 渲染待辦事項清單 (支援勾選狀態切換、行內修改與刪除)
+            // ------------------------------------------------------------------
+            function renderTodos() {
+                const total = appState.todos.length;
+                const doneCount = appState.todos.filter(function (t) { return t.completed; }).length;
+                todoCountPill.textContent = doneCount + " / " + total + " 已完成";
+
+                if (total === 0) {
+                    todoListContainer.innerHTML = '<li class="empty-state">目前尚無待辦事項，可由下方表單新增或點擊上方「重置預設三筆」</li>';
+                    return;
+                }
+
+                todoListContainer.innerHTML = appState.todos.map(function (item) {
+                    const isEditing = appState.editingId === item.id;
+                    const completedClass = item.completed ? "is-completed" : "";
+                    const statusBadge = item.completed
+                        ? '<span class="tag tag-status-done">已完成</span>'
+                        : '<span class="tag tag-status-pending">未完成</span>';
+
+                    if (isEditing) {
+                        return (
+                            '<li class="todo-item" data-id="' + escapeHtml(item.id) + '">' +
+                                '<div class="inline-edit-box">' +
+                                    '<div class="inline-edit-row">' +
+                                        '<input type="text" class="inline-input edit-todo-title" value="' + escapeHtml(item.title) + '" placeholder="待辦事項名稱" aria-label="修改待辦事項名稱">' +
+                                        '<input type="text" class="inline-input edit-todo-tag" value="' + escapeHtml(item.tag) + '" placeholder="分類標籤" aria-label="修改分類標籤">' +
+                                    '</div>' +
+                                    '<div class="inline-edit-row" style="justify-content: flex-end;">' +
+                                        '<button type="button" class="btn btn-primary btn-sm" data-action="save-todo" data-id="' + escapeHtml(item.id) + '">儲存修改</button>' +
+                                        '<button type="button" class="btn btn-outline btn-sm" data-action="cancel-edit">取消</button>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</li>'
+                        );
+                    }
+
+                    return (
+                        '<li class="todo-item ' + completedClass + '" data-id="' + escapeHtml(item.id) + '">' +
+                            '<label class="todo-main">' +
+                                '<input type="checkbox" class="todo-checkbox" data-action="toggle-todo" data-id="' + escapeHtml(item.id) + '" ' + (item.completed ? "checked" : "") + '>' +
+                                '<div class="item-info">' +
+                                    '<span class="item-title">' + escapeHtml(item.title) + '</span>' +
+                                    '<div class="item-meta">' +
+                                        statusBadge +
+                                        '<span class="tag tag-category">' + escapeHtml(item.tag || "一般任務") + '</span>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</label>' +
+                            '<div class="item-actions">' +
+                                '<button type="button" class="btn btn-outline btn-sm" data-action="edit-todo" data-id="' + escapeHtml(item.id) + '">編輯</button>' +
+                                '<button type="button" class="btn btn-danger-ghost btn-sm" data-action="delete-todo" data-id="' + escapeHtml(item.id) + '" aria-label="刪除待辦事項">刪除</button>' +
+                            '</div>' +
+                        '</li>'
+                    );
+                }).join("");
+            }
+
+            function renderAll() {
+                renderSchedules();
+                renderTodos();
+            }
+
+            // ------------------------------------------------------------------
+            // 5. 事件委派：處理行程與待辦的點擊、編輯與刪除
+            // ------------------------------------------------------------------
+            scheduleListContainer.addEventListener("click", function (e) {
+                const btn = e.target.closest("button[data-action]");
+                if (!btn) return;
+                const action = btn.getAttribute("data-action");
+                const id = btn.getAttribute("data-id");
+
+                if (action === "edit-sch") {
+                    appState.editingId = id;
+                    renderAll();
+                } else if (action === "cancel-edit") {
+                    appState.editingId = null;
+                    renderAll();
+                } else if (action === "save-sch") {
+                    const li = btn.closest(".schedule-item");
+                    const newTime = li.querySelector(".edit-sch-time").value || "09:00";
+                    const newTitle = li.querySelector(".edit-sch-title").value.trim();
+                    const newTag = li.querySelector(".edit-sch-tag").value.trim() || "未分類";
+
+                    if (!newTitle) {
+                        showToast("⚠️ 行程名稱不能為空白");
+                        return;
+                    }
+
+                    const target = appState.schedules.find(function (s) { return s.id === id; });
+                    if (target) {
+                        target.time = newTime;
+                        target.title = newTitle;
+                        target.tag = newTag;
+                    }
+                    appState.editingId = null;
+                    renderAll();
+                    saveStateToLocal(true);
+                    showToast("✏️ 已更新行程內容並自動保存");
+                } else if (action === "delete-sch") {
+                    appState.schedules = appState.schedules.filter(function (s) { return s.id !== id; });
+                    renderAll();
+                    saveStateToLocal(true);
+                    showToast("🗑️ 已刪除一筆行程");
+                }
+            });
+
+            todoListContainer.addEventListener("click", function (e) {
+                const targetEl = e.target;
+
+                // 處理勾選狀態切換
+                if (targetEl.matches('input[data-action="toggle-todo"]')) {
+                    const id = targetEl.getAttribute("data-id");
+                    const todo = appState.todos.find(function (t) { return t.id === id; });
+                    if (todo) {
+                        todo.completed = targetEl.checked;
+                        renderTodos();
+                        saveStateToLocal(true);
+                        showToast(todo.completed ? "✅ 已標記為「已完成」" : "⏳ 已切換為「未完成」");
+                    }
+                    return;
+                }
+
+                // 處理編輯與刪除按鈕
+                const btn = targetEl.closest("button[data-action]");
+                if (!btn) return;
+                const action = btn.getAttribute("data-action");
+                const id = btn.getAttribute("data-id");
+
+                if (action === "edit-todo") {
+                    appState.editingId = id;
+                    renderAll();
+                } else if (action === "cancel-edit") {
+                    appState.editingId = null;
+                    renderAll();
+                } else if (action === "save-todo") {
+                    const li = btn.closest(".todo-item");
+                    const newTitle = li.querySelector(".edit-todo-title").value.trim();
+                    const newTag = li.querySelector(".edit-todo-tag").value.trim() || "一般任務";
+
+                    if (!newTitle) {
+                        showToast("⚠️ 待辦事項名稱不能為空白");
+                        return;
+                    }
+
+                    const todo = appState.todos.find(function (t) { return t.id === id; });
+                    if (todo) {
+                        todo.title = newTitle;
+                        todo.tag = newTag;
+                    }
+                    appState.editingId = null;
+                    renderAll();
+                    saveStateToLocal(true);
+                    showToast("✏️ 已更新待辦事項並自動保存");
+                } else if (action === "delete-todo") {
+                    appState.todos = appState.todos.filter(function (t) { return t.id !== id; });
+                    renderAll();
+                    saveStateToLocal(true);
+                    showToast("🗑️ 已刪除一筆待辦事項");
+                }
+            });
+
+            // ------------------------------------------------------------------
+            // 6. 新增行程 / 待辦事項表單處理
+            // ------------------------------------------------------------------
+            inputItemType.addEventListener("change", function () {
+                const isTodo = inputItemType.value === "todo";
+                inputItemTime.disabled = isTodo;
+                inputItemTime.required = !isTodo;
+                labelItemTime.textContent = isTodo ? "時間 (待辦不需填)" : "行程時間";
+            });
+
+            addItemForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+                const type = inputItemType.value;
+                const time = inputItemTime.value || "12:00";
+                const title = inputItemTitle.value.trim();
+                const tag = inputItemTag.value.trim();
+
+                if (!title) {
+                    showToast("⚠️ 請輸入標題內容");
+                    inputItemTitle.focus();
+                    return;
+                }
+
+                const newId = "item-" + Date.now();
+
+                if (type === "schedule") {
+                    appState.schedules.push({
+                        id: newId,
+                        time: time,
+                        title: title,
+                        tag: tag || "自訂行程"
+                    });
+                    showToast("➕ 已新增固定行程：「" + title + "」");
+                } else {
+                    appState.todos.push({
+                        id: newId,
+                        title: title,
+                        tag: tag || "待辦任務",
+                        completed: false
+                    });
+                    showToast("➕ 已新增待辦事項：「" + title + "」");
+                }
+
+                inputItemTitle.value = "";
+                inputItemTag.value = "";
+                renderAll();
+                saveStateToLocal(true);
+            });
+
+            // ------------------------------------------------------------------
+            // 7. 練習輔助工具列：手機寬度模擬、保存、重置、下載 index.html
+            // ------------------------------------------------------------------
+            btnToggleMobile.addEventListener("click", function () {
+                const isSim = appViewport.classList.toggle("mobile-sim-active");
+                btnToggleMobile.classList.toggle("active-mode", isSim);
+                btnToggleMobile.textContent = isSim
+                    ? "🖥️ 切換回桌面寬度"
+                    : "📱 切換手機寬度預覽 (375px)";
+                showToast(isSim ? "📱 已開啟 375px 手機寬度模擬，可檢視排版不重疊" : "🖥️ 已恢復桌面寬度顯示");
+            });
+
+            btnSaveStorage.addEventListener("click", function () {
+                saveStateToLocal(false);
+            });
+
+            btnResetDefault.addEventListener("click", function () {
+                resetToDefaultState();
+            });
+
+            // 匯出並下載單一 index.html 檔案（支援直接開啟與上傳 GitHub）
+            btnDownloadHtml.addEventListener("click", function () {
+                // 在匯出前若是手機模擬模式，先移除模擬外框 class 以確保匯出乾淨的標準檔案
+                const wasSim = appViewport.classList.contains("mobile-sim-active");
+                if (wasSim) {
+                    appViewport.classList.remove("mobile-sim-active");
+                }
+
+                const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+
+                if (wasSim) {
+                    appViewport.classList.add("mobile-sim-active");
+                }
+
+                const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "index.html";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                stepPublishBadge.classList.add("active");
+                showToast("⬇️ 已下載 index.html！可直接雙擊開啟或上傳至 GitHub Repository");
+            });
+
+            // 驗收清單勾選進度更新
+            const evidenceCheckboxes = document.querySelectorAll(".evidence-checkbox");
+            const evidenceProgressTag = document.getElementById("evidenceProgressTag");
+            function updateEvidenceCount() {
+                let checked = 0;
+                evidenceCheckboxes.forEach(function (cb) {
+                    if (cb.checked) checked++;
+                });
+                evidenceProgressTag.textContent = "檢核進度：" + checked + " / " + evidenceCheckboxes.length;
+                if (checked === evidenceCheckboxes.length) {
+                    evidenceProgressTag.className = "tag tag-status-done";
+                } else {
+                    evidenceProgressTag.className = "tag tag-status-pending";
+                }
+            }
+            evidenceCheckboxes.forEach(function (cb) {
+                cb.addEventListener("change", updateEvidenceCount);
+            });
+
+            // ------------------------------------------------------------------
+            // 啟動初始化
+            // ------------------------------------------------------------------
+            setTodayDate();
+            loadState();
+            renderAll();
+            updateEvidenceCount();
+        })();
+    </script>
+
+</body></html>
